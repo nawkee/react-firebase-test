@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { auth } from "../firebase";
+import { auth, database } from "../firebase";
 
 const AuthContext = React.createContext();
 
@@ -11,8 +11,51 @@ export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState();
     const [loading, setLoading] = useState(true);
 
-    const signup = (firstName, lastName, email, password) => {
+    const signup = (email, password) => {
         return auth.createUserWithEmailAndPassword(email, password);
+    }
+
+    const addData = (firstName, lastName) => {
+        const usersDatabase = database.ref().child('users');
+        const userID = auth.currentUser.uid;
+        const userRef = usersDatabase.child(userID);
+
+        const userData = {
+            "firstName": firstName,
+            "lastName": lastName,
+            "desktopTimer": 0,
+            "mobileTimer": 0
+        };
+
+        return userRef.set(userData, (err) => {
+            if (err) {
+                console.log(err.message);
+            }
+        });
+    }
+
+    function updTimer(device) {
+        const usersDatabase = database.ref().child('users');
+        const userID = auth.currentUser.uid;
+        const userRef = usersDatabase.child(userID);
+
+        return userRef.once('value')
+            .then(snapshot => {
+                const data = snapshot.val();
+
+                let updated = {};
+                device === 'desktop' ?
+                 updated = {...data, desktopTimer: data.desktopTimer + 1}
+                :
+                 updated = {...data, mobileTimer: data.mobileTimer + 1};
+
+                userRef.set(updated, (err) => {
+                    if (err) {
+                        console.log(err.message);
+                    }
+                });
+                return [updated.mobileTimer, updated.desktopTimer];
+            });
     }
 
     const login = (email, password) => {
@@ -36,7 +79,9 @@ export const AuthProvider = ({ children }) => {
         currentUser,
         login,
         signup,
-        logout
+        addData,
+        logout,
+        updTimer
     }
 
     return (

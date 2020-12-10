@@ -9,6 +9,7 @@ const Signup = () => {
     const passwordRef = useRef();
 
     const { signup } = useAuth();
+    const { addData } = useAuth();
 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,7 +22,8 @@ const Signup = () => {
         try {
             setError('');
             setLoading(true);
-            await signup(firstNameRef.current.value, lastNameRef.current.value, emailRef.current.value, passwordRef.current.value);
+            await signup(emailRef.current.value, passwordRef.current.value);
+            await addData(firstNameRef.current.value, lastNameRef.current.value);
             history.push("/");
         } catch {
             setError('Failed to create an account');
