@@ -1,10 +1,14 @@
 import './App.css';
+import Signup from "./components/Signup";
+import {AuthProvider} from "./context/authContext";
 
 function App() {
   return (
-    <div className="App">
-
-    </div>
+      <AuthProvider>
+        <div className={"App d-flex-center"}>
+          <Signup />
+        </div>
+      </AuthProvider>
   );
 }
 
